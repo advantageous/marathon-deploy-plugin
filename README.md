@@ -6,17 +6,10 @@ This plugin is used in conjunction with the [application plugin](https://docs.gr
 
 ### build.gradle
 
-	buildscript {
-		repositories {
-            jcenter()
-		}
-		dependencies {
-            classpath 'io.advantageous.gradle:marathon-deploy-plugin:1.0.0'
-		}
-	}
-
-	apply plugin: 'application'
-	apply plugin: 'io.advantageous.marathon'
+    plugins {
+      id "application"
+      id "io.advantageous.marathon" version "1.0.0"
+    }
     
     marathonEnvironments {
         staging {
