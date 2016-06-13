@@ -1,14 +1,24 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.4"
+    }
+}
+
 group 'io.advantageous.gradle'
 version '1.0.0'
 
-apply plugin: 'maven'
 apply plugin: 'groovy'
-apply plugin: 'signing'
+apply plugin: "com.gradle.plugin-publish"
 
 sourceCompatibility = 1.8
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 project.task("wrapper", type: Wrapper) {
@@ -21,73 +31,16 @@ dependencies {
     compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
 }
 
-signing {
-    required false
-    sign configurations.archives
-}
+pluginBundle {
+    website = 'https://github.com/advantageous/marathon-deploy-plugin'
+    vcsUrl = 'https://github.com/advantageous/marathon-deploy-plugin.git'
+    description = 'Deploy your application to an Apache Marathon cluster.'
+    tags = ['marathon', 'mesos', 'deploy', 'continuous delivery']
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from 'build/docs/javadoc'
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives jar
-    archives javadocJar
-    archives sourcesJar
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                try {
-                    authentication(userName: sonatypeUsername, password: sonatypePassword)
-                } catch (MissingPropertyException ignore) {
-                }
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                try {
-                    authentication(userName: sonatypeUsername, password: sonatypePassword)
-                } catch (MissingPropertyException ignore) {
-                }
-            }
-
-            pom.project {
-                packaging 'jar'
-                url 'https://github.com/advantageous/marathon-deploy-plugin'
-                description 'Marathon Deployer Plugin for Gradle'
-                name project.name
-
-                scm {
-                    url 'scm:git@github.com:advantageous/marathon-deploy-plugin.git'
-                    connection 'scm:git@github.com:advantageous/marathon-deploy-plugin.git'
-                    developerConnection 'scm:git@github.com:advantageous/marathon-deploy-plugin.git'
-                }
-
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution 'repo'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'sailorgeoffrey'
-                        name 'Geoffrey Chandler'
-                    }
-                }
-            }
+    plugins {
+        greetingsPlugin {
+            id = 'io.advantageous.marathon'
+            displayName = 'Marathon Deployment Plugin'
         }
     }
 }

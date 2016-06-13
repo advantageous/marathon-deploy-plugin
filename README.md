@@ -8,7 +8,7 @@ This plugin is used in conjunction with the [application plugin](https://docs.gr
 
 	buildscript {
 		repositories {
-            mavenCentral()
+            jcenter()
 		}
 		dependencies {
             classpath 'io.advantageous.gradle:marathon-deploy-plugin:1.0.0'
@@ -16,7 +16,7 @@ This plugin is used in conjunction with the [application plugin](https://docs.gr
 	}
 
 	apply plugin: 'application'
-	apply plugin: 'marathon-deploy'
+	apply plugin: 'io.advantageous.marathon'
     
     marathonEnvironments {
         staging {
