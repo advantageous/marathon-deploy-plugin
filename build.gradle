@@ -38,7 +38,7 @@ pluginBundle {
     tags = ['marathon', 'mesos', 'deploy', 'continuous delivery']
 
     plugins {
-        greetingsPlugin {
+        marathonDeployPlugin {
             id = 'io.advantageous.marathon'
             displayName = 'Marathon Deployment Plugin'
         }
