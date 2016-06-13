@@ -12,39 +12,39 @@ public class MarathonDeployPlugin implements Plugin<Project> {
 
     void apply(Project project) {
 
-        project.extensions.mesosEnvironments = project.container(MesosEnvironment)
+        project.extensions.marathonEnvironments = project.container(MarathonEnvironment)
 
-        project.task("showMesosEnvironments") << {
-            project.extensions.mesosEnvironments.forEach { println it }
+        project.task("showMarathonEnvironments") << {
+            project.extensions.marathonEnvironments.forEach { println it }
         }
 
         project.afterEvaluate {
             def slurper = new JsonSlurper()
-            project.extensions.mesosEnvironments.each { MesosEnvironment myEnv ->
+            project.extensions.marathonEnvironments.each { MarathonEnvironment myEnv ->
                 project.task("deploy${myEnv.name.capitalize()}",
-                        description: "Deploy to Mesos in the ${myEnv.name.capitalize()} environment") << {
+                        description: "Deploy to Marathon in the ${myEnv.name.capitalize()} environment") << {
 
-                    def mesosConfig = slurper.parse(project.file(myEnv.jsonLocation))
-                    mesosConfig.id = mesosConfig.id ?: project.name
-                    mesosConfig.cmd = mesosConfig.cmd ?: "${project.name}-${project.version}/bin/${project.name}"
-                    mesosConfig.uris = mesosConfig.uris ?: [
+                    def marathonConfig = slurper.parse(project.file(myEnv.jsonLocation))
+                    marathonConfig.id = marathonConfig.id ?: project.name
+                    marathonConfig.cmd = marathonConfig.cmd ?: "${project.name}-${project.version}/bin/${project.name}"
+                    marathonConfig.uris = marathonConfig.uris ?: [
                             myEnv.mavenRepo +
                                     project.group.replaceAll('\\.', '/') + '/' +
                                     project.name + '/' + project.version + '/' +
                                     project.name + '-' + project.version + '.zip'
                     ]
-                    if (mesosConfig.additionalUris) {
-                        mesosConfig.uris += mesosConfig.additionalUris
-                        mesosConfig.additionalUris = null;
+                    if (marathonConfig.additionalUris) {
+                        marathonConfig.uris += marathonConfig.additionalUris
+                        marathonConfig.additionalUris = null;
                     }
-                    if (!mesosConfig.env) {
-                        mesosConfig.env = [:]
+                    if (!marathonConfig.env) {
+                        marathonConfig.env = [:]
                     }
-                    mesosConfig.env.DEPLOYMENT_ENVIRONMENT = mesosConfig.env.DEPLOYMENT_ENVIRONMENT ?: myEnv.name
+                    marathonConfig.env.DEPLOYMENT_ENVIRONMENT = marathonConfig.env.DEPLOYMENT_ENVIRONMENT ?: myEnv.name
 
                     if (project.hasProperty("dryRun")) {
                         println "DRY RUN JSON:"
-                        println prettyPrint(toJson(mesosConfig))
+                        println prettyPrint(toJson(marathonConfig))
                     } else {
                         def client = new RESTClient(myEnv.marathonApi, "application/json")
                         client.ignoreSSLIssues()
@@ -57,12 +57,12 @@ public class MarathonDeployPlugin implements Plugin<Project> {
                             def found = data.apps.find { it.id == "/$project.name" }
                             if (found) {
                                 logger.info "Found $project.name in Marathon. Going to do a PUT"
-                                def putResp = client.put(path: "/v2/apps/$project.name", body: toJson(mesosConfig))
+                                def putResp = client.put(path: "/v2/apps/$project.name", body: toJson(marathonConfig))
                                 logger.info "put response:"
                                 logger.info toJson(putResp.getData())
                             } else {
                                 logger.info "Did not find $project.name in Marathon. Going to do a POST"
-                                def postResp = client.post(path: "/v2/apps/", body: toJson(mesosConfig))
+                                def postResp = client.post(path: "/v2/apps/", body: toJson(marathonConfig))
                                 logger.info "post response:"
                                 logger.info toJson(postResp.getData())
                             }

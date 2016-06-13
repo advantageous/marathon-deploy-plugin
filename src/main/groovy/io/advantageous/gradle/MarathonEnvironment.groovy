@@ -2,7 +2,7 @@ package io.advantageous.gradle
 
 import groovy.json.JsonBuilder
 
-class MesosEnvironment {
+class MarathonEnvironment {
 
     private final String name
 
@@ -10,21 +10,21 @@ class MesosEnvironment {
     private String jsonLocation;
     private String mavenRepo;
 
-    MesosEnvironment(String name) {
+    MarathonEnvironment(String name) {
         this.name = name
     }
 
-    MesosEnvironment marathonApi(String marathonApi) {
+    MarathonEnvironment marathonApi(String marathonApi) {
         this.marathonApi = marathonApi
         this
     }
 
-    MesosEnvironment mavenRepo(String mavenRepo) {
+    MarathonEnvironment mavenRepo(String mavenRepo) {
         this.mavenRepo = mavenRepo
         this
     }
 
-    MesosEnvironment jsonLocation(String jsonLocation) {
+    MarathonEnvironment jsonLocation(String jsonLocation) {
         this.jsonLocation = jsonLocation
         this
     }

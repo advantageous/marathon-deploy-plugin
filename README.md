@@ -22,7 +22,7 @@ This plugin is used in conjunction with the [application plugin](https://docs.gr
     	url = "http://path-to-your-marathon-instance.com"
     }
     
-    mesosEnvironments {
+    marathonEnvironments {
         staging {
             marathonApi "http://url-for-for-your-staging-marathon-instance:8080"
             mavenRepo "http://url-for-for-your-artifactory-instance:8081/artifactory/libs-snapshot-local/"
@@ -36,7 +36,7 @@ This plugin is used in conjunction with the [application plugin](https://docs.gr
 ### Marathon JSON Files
 
 By default the plugin expects a **marathon** directory in the root of your project where there will be a json file for each of your configured environments.
-With the above example, you would have a *staging.json* and a *production.json*.
+With the above example, you would have a *staging.json* and a *production.json*.  The name of the json files **must** match the name of the marathon environment declared in the build.gradle.
 
     myProject
       + marathon
@@ -99,4 +99,27 @@ If you have additional dependencies for your application that you want to list i
             },
         ]
     }
+    
+### Gradle Commands
+    
+    $ gradle showMarathonEnvironments
+    
+    $ gradle deployMyEnvName
+       
+You can show what environments are registered with the **showMarathonEnvironments** command.
+A dynamic task is generated for each environment you setup in your build.gradle file.  In the example above, you would be able to run the following commands:
+    
+    $ gradle deployStaging
+    
+    $ gradle deployProduction
+        
+You can always list all possible tasks with:
+
+    $ gradle tasks
+    
+#### Dry Run
+
+If you want to see the json created by the plugin without actually deploying it to your env.  You can pass a flag to do a dry run.  This will just print out the generated json.
+
+    $ gradle deployStaging -PdryRun
     
