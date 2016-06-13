@@ -42,7 +42,7 @@ class MesosEnvironment {
     }
 
     String getJsonLocation() {
-        return jsonLocation ?: "mesos/${name}.json"
+        return jsonLocation ?: "marathon/${name}.json"
     }
 
     String toString() {
