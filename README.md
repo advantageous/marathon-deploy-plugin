@@ -18,10 +18,6 @@ This plugin is used in conjunction with the [application plugin](https://docs.gr
 	apply plugin: 'application'
 	apply plugin: 'marathon-deploy'
     
-    marathon {
-    	url = "http://path-to-your-marathon-instance.com"
-    }
-    
     marathonEnvironments {
         staging {
             marathonApi "http://url-for-for-your-staging-marathon-instance:8080"
