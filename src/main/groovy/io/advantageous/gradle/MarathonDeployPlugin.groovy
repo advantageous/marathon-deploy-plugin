@@ -1,6 +1,7 @@
 package io.advantageous.gradle
 
 import groovy.json.JsonSlurper
+import groovy.text.SimpleTemplateEngine
 import groovyx.net.http.RESTClient
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -10,43 +11,59 @@ import static groovy.json.JsonOutput.toJson
 
 public class MarathonDeployPlugin implements Plugin<Project> {
 
+    static parseStrings(target, project) {
+        for (entry in target) {
+            if (entry.getValue() instanceof Map) {
+                parseStrings(entry.getValue(), project)
+            } else if (entry.getValue() instanceof Collection) {
+                ((Collection) entry.getValue()).forEach { parseStrings(it, project) }
+            } else if (entry.getValue() instanceof String) {
+                def parsed = new SimpleTemplateEngine()
+                        .createTemplate(entry.getValue() as String)
+                        .make([project: project])
+                        .toString()
+                entry.setValue(parsed)
+            }
+        }
+    }
+
     void apply(Project project) {
 
-        project.extensions.marathonEnvironments = project.container(MarathonEnvironment)
+        project.extensions.create('marathon', MarathonPluginExtension)
+        project.marathon.environments = project.container(MarathonEnvironment)
 
         project.task("showMarathonEnvironments") << {
-            project.extensions.marathonEnvironments.forEach { println it }
+            project.marathon.environments.forEach { println it }
         }
 
         project.afterEvaluate {
             def slurper = new JsonSlurper()
-            project.extensions.marathonEnvironments.each { MarathonEnvironment myEnv ->
-                project.task("deploy${myEnv.name.capitalize()}",
-                        description: "Deploy to Marathon in the ${myEnv.name.capitalize()} environment") << {
 
-                    def marathonConfig = slurper.parse(project.file(myEnv.jsonLocation))
-                    marathonConfig.id = marathonConfig.id ?: project.name
-                    marathonConfig.cmd = marathonConfig.cmd ?: "${project.name}-${project.version}/bin/${project.name}"
-                    marathonConfig.uris = marathonConfig.uris ?: [
-                            myEnv.mavenRepo +
-                                    project.group.replaceAll('\\.', '/') + '/' +
-                                    project.name + '/' + project.version + '/' +
-                                    project.name + '-' + project.version + '.zip'
-                    ]
-                    if (marathonConfig.additionalUris) {
-                        marathonConfig.uris += marathonConfig.additionalUris
-                        marathonConfig.additionalUris = null;
-                    }
+            project.marathon.environments.each { thisEnv ->
+
+                def capitalizedName = thisEnv.getName().capitalize()
+                project.task("interpret${capitalizedName}Config",
+                        description: "Parse the configuration file for the ${thisEnv.getName()} environment") << {
+                    def config = slurper.parse(project.file(thisEnv.jsonLocation))
+                    parseStrings(config, project)
+                    println prettyPrint(toJson(config))
+                }
+
+                project.task("deploy${capitalizedName}",
+                        dependsOn: "dockerPush",
+                        description: "Deploy to Marathon in the ${thisEnv.getName()} environment") << {
+                    def marathonConfig = slurper.parse(project.file(thisEnv.jsonLocation))
+                    parseStrings(marathonConfig, project)
                     if (!marathonConfig.env) {
                         marathonConfig.env = [:]
                     }
-                    marathonConfig.env.DEPLOYMENT_ENVIRONMENT = marathonConfig.env.DEPLOYMENT_ENVIRONMENT ?: myEnv.name
-
+                    marathonConfig.env.DEPLOYMENT_ENVIRONMENT =
+                            marathonConfig.env.DEPLOYMENT_ENVIRONMENT ?: thisEnv.getName()
                     if (project.hasProperty("dryRun")) {
                         println "DRY RUN JSON:"
                         println prettyPrint(toJson(marathonConfig))
                     } else {
-                        def client = new RESTClient(myEnv.marathonApi, "application/json")
+                        def client = new RESTClient(thisEnv.marathonApi, "application/json")
                         client.ignoreSSLIssues()
 
                         def listResp = client.get(path: "/v2/apps")
@@ -72,7 +89,6 @@ public class MarathonDeployPlugin implements Plugin<Project> {
                             )
                         }
                     }
-
                 }
             }
         }

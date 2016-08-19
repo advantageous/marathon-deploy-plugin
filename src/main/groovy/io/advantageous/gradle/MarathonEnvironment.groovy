@@ -8,7 +8,6 @@ class MarathonEnvironment {
 
     private String marathonApi;
     private String jsonLocation;
-    private String mavenRepo;
 
     MarathonEnvironment(String name) {
         this.name = name
@@ -16,11 +15,6 @@ class MarathonEnvironment {
 
     MarathonEnvironment marathonApi(String marathonApi) {
         this.marathonApi = marathonApi
-        this
-    }
-
-    MarathonEnvironment mavenRepo(String mavenRepo) {
-        this.mavenRepo = mavenRepo
         this
     }
 
@@ -35,10 +29,6 @@ class MarathonEnvironment {
 
     String getMarathonApi() {
         return marathonApi
-    }
-
-    String getMavenRepo() {
-        return mavenRepo
     }
 
     String getJsonLocation() {

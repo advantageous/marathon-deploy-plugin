@@ -10,9 +10,10 @@ buildscript {
 }
 
 group 'io.advantageous.gradle'
-version '1.0.0'
+version '2.0.0'
 
 apply plugin: 'groovy'
+apply plugin: 'maven'
 apply plugin: "com.gradle.plugin-publish"
 
 sourceCompatibility = 1.8
@@ -22,7 +23,7 @@ repositories {
 }
 
 project.task("wrapper", type: Wrapper) {
-    gradleVersion = '2.11'
+    gradleVersion = '3.0'
 }
 
 dependencies {
