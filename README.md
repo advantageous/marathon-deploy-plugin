@@ -1,24 +1,21 @@
 # Marathon Deploy Plugin for Gradle
 
-This plugin is used in conjunction with the [application plugin](https://docs.gradle.org/current/userguide/application_plugin.html) to deploy an application to [Marathon](https://mesosphere.github.io/marathon/).
+This plugin is used to deploy an application to [Marathon](https://mesosphere.github.io/marathon/).
 
 ## Usage
 
 ### build.gradle
 
     plugins {
-      id "application"
-      id "io.advantageous.marathon" version "1.0.0"
+      id "io.advantageous.marathon" version "2.0.0"
     }
     
     marathonEnvironments {
         staging {
             marathonApi "http://url-for-for-your-staging-marathon-instance:8080"
-            mavenRepo "http://url-for-for-your-artifactory-instance:8081/artifactory/libs-snapshot-local/"
         }
         production {
             marathonApi "http://url-for-for-your-production-marathon-instance:8080"
-            mavenRepo "http://url-for-for-your-artifactory-instance:8081/artifactory/libs-release-local/"
         }
     }
     
@@ -37,21 +34,30 @@ These files are exactly what you would put in a regular marathon json configurat
 
 #### staging.json
     {
+        "id": "${project.name}",
         "instances": 1,
         "cpus": 1.0,
         "mem": 512,
-        "portDefinitions": [
-            {
+        "container": {
+          "type": "DOCKER",
+          "image": "${project.docker.name}",
+          "docker": {
+            "network": "HOST",
+            "forcePullImage": true,
+            "portDefinitions": [
+              {
                 "port": 0,
                 "protocol": "tcp",
                 "name": "eventbus"
-            },
-            {
+              },
+              {
                 "port": 0,
                 "protocol": "tcp",
                 "name": "admin"
-            }
-        ],
+              }
+            ]
+          }
+        },
         "healthChecks": [
             {
                 "protocol": "HTTP",
@@ -67,27 +73,7 @@ These files are exactly what you would put in a regular marathon json configurat
         }
     }
     
-You will notice a few common fields are missing.  The **id**, **cmd** and **uris** fields are automatically created from the layout of your project when the plugin runs.
-If you want to use your own values, you may set any of those fields and yours will take precedence.
-
-#### Extra URIs
-
-If you have additional dependencies for your application that you want to list in the *uris* field, but want the convenience of an auto-generated URI from your maven repository, you can put then in a *additionalUris* field and they will be merged.
-    
-    {
-        "instances": 1,
-        "cpus": 1.0,
-        "mem": 512,
-        "additionalUris": [
-            "http://path-to-some-other-dependency"
-        ],
-        "portDefinitions": [
-            {
-                "port": 0,
-                "protocol": "tcp",
-            },
-        ]
-    }
+You will notice variable substitutions for the docker image name and the app id.  The file is parsed by gradle before it is used so you can use anything in the project metadata.
     
 ### Gradle Commands
     
@@ -112,3 +98,6 @@ If you want to see the json created by the plugin without actually deploying it 
 
     $ gradle deployStaging -PdryRun
     
+You can also check the marathon deploy file parsing by with the command:
+
+    $ gradle interpretStagingConfig
