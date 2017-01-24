@@ -10,7 +10,7 @@ This plugin is used to deploy an application to [Marathon](https://mesosphere.gi
       id "io.advantageous.marathon" version "2.0.0"
     }
     
-    marathonEnvironments {
+    marathon.environments {
         staging {
             marathonApi "http://url-for-for-your-staging-marathon-instance:8080"
         }
