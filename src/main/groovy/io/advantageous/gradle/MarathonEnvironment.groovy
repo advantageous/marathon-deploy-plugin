@@ -6,8 +6,9 @@ class MarathonEnvironment {
 
     private final String name
 
-    private String marathonApi;
-    private String jsonLocation;
+    private String marathonApi
+    private String jsonLocation
+    private Map<String, Object> props
 
     MarathonEnvironment(String name) {
         this.name = name
@@ -23,6 +24,11 @@ class MarathonEnvironment {
         this
     }
 
+    MarathonEnvironment props(Map<String, Object> jsonLocation) {
+        this.jsonLocation = jsonLocation
+        this
+    }
+
     String getName() {
         return name
     }
@@ -31,8 +37,12 @@ class MarathonEnvironment {
         return marathonApi
     }
 
+    Map<String, Object> getProps() {
+        return props
+    }
+
     String getJsonLocation() {
-        return jsonLocation ?: "marathon/${name}.json"
+        return jsonLocation ?: new File("marathon/${name}.json").exists() ? "marathon/${name}.json" : "marathon.json"
     }
 
     String toString() {

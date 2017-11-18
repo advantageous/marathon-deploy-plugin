@@ -1,0 +1,4 @@
+FROM ${base_image}
+ADD ${target_jar} app.jar
+EXPOSE ${container_port}
+CMD java ${java_args} -jar /app.jar
