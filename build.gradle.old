@@ -22,14 +22,16 @@ repositories {
     jcenter()
 }
 
-project.task("wrapper", type: Wrapper) {
-    gradleVersion = '3.0'
-}
-
 dependencies {
     compile gradleApi()
     compile localGroovy()
     compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+}
+
+publishing {
+    repositories {
+        maven(url = "build/repository")
+    }
 }
 
 pluginBundle {
