@@ -16,12 +16,52 @@ class MarathonDeployPlugin implements Plugin<Project> {
 
     void apply(Project project) {
 
-        project.extensions.create('marathon', MarathonPluginExtension)
-        project.marathon.environments = project.container(MarathonEnvironment)
+        def foo = new File("/Users/gcc/foo")
 
-        project.task("dockerPush") {
+        project.extensions.create('marathon', MarathonPluginExtension, project)
+        project.marathon.environments = project.container(MarathonEnvironment)
+        project.marathon.extensions.create("docker", DockerContainer, project)
+        project.marathon.docker.extensions.create("dockerFile", DockerFile)
+
+        project.task("dockerFile") {
             doLast {
-                DockerUtils.pushDocker()
+                foo << "started task\n"
+                project.marathon.docker.dockerTags.each {
+                    foo << "docker tag: $it\n"
+                }
+//                DockerFileExtension dockerFile = project.marathon.docker.dockerFile
+//                if (dockerFile == null) throw new RuntimeException(
+//                        "Either a dockerfile location or a configuration closure must be specified."
+//                )
+//                String generatedFile
+//                if (dockerFile.fileLocation) {
+//                    generatedFile = project.file(dockerFile.fileLocation).toString()
+//                } else {
+//                    generatedFile = "FROM ${dockerFile.baseImage}\n"
+//                    dockerFile.addCommands.each { generatedFile += "ADD ${it}\n" }
+//                    dockerFile.exposedPorts.each { generatedFile += "EXPOSE ${it}\n" }
+//                    generatedFile += "CMD ${dockerFile.cmd}\n"
+//                }
+//                println generatedFile
+//                project.file("build/docker/Dockerfile") << generatedFile
+            }
+        }
+
+        project.task("dockerBuild", dependsOn: "dockerFile") {
+            doLast {
+                DockerUtils.buildDocker(project.marathon.docker.dockerTag as String)
+            }
+        }
+
+        project.task("dockerRun") {
+            doLast {
+                DockerUtils.runDocker(project.marathon.docker.dockerTag as String)
+            }
+        }
+
+        project.task("dockerPush", dependsOn: "dockerBuild") {
+            doLast {
+                DockerUtils.pushDocker(project.marathon.docker.dockerTag as String)
             }
         }
 

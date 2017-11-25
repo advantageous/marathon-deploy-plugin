@@ -1,0 +1,46 @@
+{
+  "id": "/this/is/the/old/id",
+  "cpus": 0.5,
+  "mem": 2048,
+  "disk": 0,
+  "instances": 1,
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "foo/bar",
+      "network": "BRIDGE",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 0,
+          "protocol": "tcp"
+        }
+      ],
+      "privileged": false,
+      "forcePullImage": true
+    }
+  },
+  "env": {
+    "LOGBACK_PATTERN": "%d{HH:mm:ss.SSS}-[%-5level] %logger{15} - %msg%n",
+    "SPRING_PROFILES_ACTIVE": "integration"
+  },
+  "healthChecks": [
+    {
+      "path": "/application/status",
+      "protocol": "HTTP",
+      "portIndex": 0,
+      "gracePeriodSeconds": 300,
+      "intervalSeconds": 10,
+      "timeoutSeconds": 20,
+      "maxConsecutiveFailures": 10,
+      "ignoreHttp1xx": false
+    }
+  ],
+  "labels": {
+    "HAPROXY_GROUP": "external",
+    "HAPROXY_0_VHOST": "some.service.mycompany.com"
+  },
+  "uris": [
+    "file:///mnt/efs/marathon/dockerhub-shared-config.tar.gz"
+  ]
+}
