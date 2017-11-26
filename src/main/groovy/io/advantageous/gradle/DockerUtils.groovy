@@ -5,14 +5,14 @@ import org.slf4j.LoggerFactory
 class DockerUtils {
     static logger = LoggerFactory.getLogger(DockerUtils.class.getName())
 
-    static pushDocker(String dockerCoordinates) {
-        logger.info("docker push ${dockerCoordinates}")
-        runCommand("docker", "push", dockerCoordinates)
-    }
-
     static runDocker(String dockerCoordinates) {
         logger.info('docker run -P ' + dockerCoordinates)
         runCommand("docker", "run", "-P", dockerCoordinates)
+    }
+
+    static pushDocker(String dockerCoordinates) {
+        logger.info("docker push ${dockerCoordinates}")
+        runCommand("docker", "push", dockerCoordinates)
     }
 
     static buildDocker(String dockerCoordinates) {

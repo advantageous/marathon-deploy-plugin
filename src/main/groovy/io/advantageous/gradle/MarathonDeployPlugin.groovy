@@ -16,12 +16,41 @@ class MarathonDeployPlugin implements Plugin<Project> {
 
     void apply(Project project) {
 
-        project.extensions.create('marathon', MarathonPluginExtension)
+        project.extensions.create('marathon', MarathonPluginExtension, project)
         project.marathon.environments = project.container(MarathonEnvironment)
 
-        project.task("dockerPush") {
+        project.task("dockerFile") {
             doLast {
-                DockerUtils.pushDocker()
+                DockerFile dockerFile = project.marathon.docker.dockerFile
+                String generatedFile
+                if (dockerFile.fileLocation) {
+                    generatedFile = project.file(dockerFile.fileLocation).toString()
+                } else {
+                    generatedFile = "FROM ${dockerFile.baseImage}\n"
+                    dockerFile.addCommands.each { generatedFile += "ADD ${it}\n" }
+                    dockerFile.exposedPorts.each { generatedFile += "EXPOSE ${it}\n" }
+                    generatedFile += "CMD ${dockerFile.cmd}\n"
+                }
+                project.file("build/docker").mkdirs()
+                project.file("build/docker/Dockerfile") << generatedFile
+            }
+        }
+
+        project.task("dockerBuild", dependsOn: "dockerFile") {
+            doLast {
+                DockerUtils.buildDocker(project.marathon.docker.dockerTag as String)
+            }
+        }
+
+        project.task("dockerRun") {
+            doLast {
+                DockerUtils.runDocker(project.marathon.docker.dockerTag as String)
+            }
+        }
+
+        project.task("dockerPush", dependsOn: "dockerBuild") {
+            doLast {
+                DockerUtils.pushDocker(project.marathon.docker.dockerTag as String)
             }
         }
 

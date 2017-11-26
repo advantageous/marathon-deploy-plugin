@@ -1,16 +1,25 @@
 package io.advantageous.gradle
 
-import javax.annotation.Nullable
+import org.gradle.api.Project
 
- interface DockerContainer {
+class DockerContainer {
 
-    @Nullable
-    String getUsername()
+    final Project project
 
-    void setUsername(@Nullable String userName);
+    DockerContainer(Project project) {
+        this.project = project
+    }
 
-    @Nullable
-    String getPassword();
+    List<String> dockerTags = []
+    DockerFile dockerFile
 
-    void setPassword(@Nullable String password);
+    def dockerFile(Closure config) {
+        this.dockerFile = new DockerFile(this.project)
+        this.project.configure(this.dockerFile, config)
+    }
+
+    def tag(String tag) {
+        dockerTags.add(tag)
+    }
+
 }
