@@ -4,6 +4,8 @@ import org.gradle.internal.impldep.org.junit.Rule
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -45,6 +47,6 @@ marathon {
                 .withPluginClasspath()
                 .build()
 
-//        assertEquals(result.task(":dockerFile").getOutcome(), SUCCESS)
+        Assert.assertEquals(result.task(":dockerFile").getOutcome(), TaskOutcome.SUCCESS)
     }
 }
