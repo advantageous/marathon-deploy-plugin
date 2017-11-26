@@ -6,8 +6,9 @@ class MarathonEnvironment {
 
     private final String name
 
-    private String marathonApi;
-    private String jsonLocation;
+    private String marathonApi
+    private String jsonLocation
+    private Map<String, Object> application
 
     MarathonEnvironment(String name) {
         this.name = name
@@ -23,6 +24,11 @@ class MarathonEnvironment {
         this
     }
 
+    MarathonEnvironment application(Map<String, Object> application) {
+        this.application = application
+        this
+    }
+
     String getName() {
         return name
     }
@@ -31,8 +37,20 @@ class MarathonEnvironment {
         return marathonApi
     }
 
+    Map<String, Object> getApplication() {
+        return application
+    }
+
     String getJsonLocation() {
-        return jsonLocation ?: "marathon/${name}.json"
+        if (jsonLocation) {
+            return jsonLocation
+        } else if (new File("marathon.${name}.json").exists()) {
+            return "marathon.${name}.json"
+        } else if (new File("marathon.json").exists()) {
+            return "marathon.json"
+        } else {
+            return null
+        }
     }
 
     String toString() {
