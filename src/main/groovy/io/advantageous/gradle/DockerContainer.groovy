@@ -1,5 +1,6 @@
 package io.advantageous.gradle
 
+import org.gradle.api.Action
 import org.gradle.api.Project
 
 class DockerContainer {
@@ -13,9 +14,9 @@ class DockerContainer {
     List<String> dockerTags = []
     DockerFile dockerFile
 
-    def dockerFile(Closure config) {
+    def dockerFile(Action<DockerFile> config) {
         this.dockerFile = new DockerFile(this.project)
-        this.project.configure(this.dockerFile, config)
+        this.project.configure([this.dockerFile], config)
     }
 
     def tag(String tag) {

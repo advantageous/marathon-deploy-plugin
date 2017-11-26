@@ -26,8 +26,8 @@ class MarathonPluginExtension {
         this.application = application
     }
 
-    def docker(Closure configureClosure) {
+    def docker(Action<DockerContainer> configureClosure) {
         this.docker = new DockerContainer(this.project)
-        this.project.configure(this.docker, configureClosure)
+        this.project.configure([this.docker], configureClosure)
     }
 }
