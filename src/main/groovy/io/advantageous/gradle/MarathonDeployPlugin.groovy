@@ -31,14 +31,13 @@ class MarathonDeployPlugin implements Plugin<Project> {
                     dockerFile.exposedPorts.each { generatedFile += "EXPOSE ${it}\n" }
                     generatedFile += "CMD ${dockerFile.cmd}\n"
                 }
-                project.file("build/docker").mkdirs()
-                project.file("build/docker/Dockerfile") << generatedFile
+                project.file("build/Dockerfile") << generatedFile
             }
         }
 
         project.task("dockerBuild", dependsOn: "dockerFile") {
             doLast {
-                DockerUtils.buildDocker(project.marathon.docker.dockerTag as String)
+                DockerUtils.buildDocker(project.marathon.docker.dockerTags as List<String>)
             }
         }
 

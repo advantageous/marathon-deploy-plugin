@@ -1,38 +1,69 @@
 # Marathon Deploy Plugin for Gradle
 
 This plugin is used to deploy an application to [Marathon](https://mesosphere.github.io/marathon/).
-
+Version 3 supports Kotlin DSL, automatic docker config and property overrides per environment.
 ## Usage
 
-### build.gradle
+### build.gradle.kts
 
     plugins {
-      id "io.advantageous.marathon" version "2.0.0"
+      id("io.advantageous.marathon") version "3.0.0"
     }
     
-    marathon.environments {
-        staging {
-            marathonApi "http://url-for-for-your-staging-marathon-instance:8080"
+    marathon {
+    
+      val dockerTag = "myrepo-docker.jfrog.io/my-service:${project.version}"
+    
+      // This defines the docker container.
+      docker {
+        tag(dockerTag)
+        if (gitBranch() == "master") {
+          tag("rbss-docker.jfrog.io/event-service:latest")
         }
-        production {
-            marathonApi "http://url-for-for-your-production-marathon-instance:8080"
+        dockerFile {
+          baseImage = "openjdk:8-jre-alpine"
+          add("libs/my-service-${project.version}.jar", "my-service.jar")
+          exposePort(8080)
+          cmd = "java -Xmx2g -Xmx2g -jar /my-service.jar"
         }
+      }
+    
+      // This is an optional way of overriding keys in the marathon.json file.
+      application(mapOf(
+          "mem" to 2048,
+          "container.docker.image" to dockerTag
+      ))
+    
+      environments {
+        "integration" {
+          marathonApi("http://url-for-for-your-integration-marathon-instance:8080")
+        }
+        "staging" {
+          marathonApi("http://url-for-for-your-staging-marathon-instance:8080")
+          application(mapOf(
+              "env.SPRING_PROFILES_ACTIVE" to "staging"
+          ))
+        }
+        if (!project.version.toString().contains("SNAPSHOT")) "production" {
+          marathonApi("http://url-for-for-your-production-marathon-instance:8080")
+          application(mapOf(
+              "env.SPRING_PROFILES_ACTIVE" to "production",
+              "cpus" to 1,
+              "instances" to 3
+          ))
+        }
+      }
     }
     
 ### Marathon JSON Files
 
-By default the plugin expects a **marathon** directory in the root of your project where there will be a json file for each of your configured environments.
-With the above example, you would have a *staging.json* and a *production.json*.  The name of the json files **must** match the name of the marathon environment declared in the build.gradle.
-
-    myProject
-      + marathon
-        - staging.json
-        - production.json
-      - build.gradle
+The plugin can take a Marathon application json template or your can construct it with the application builder.
+If there is a *marathon.json* in the root of the project, it will be used.  Environment specific json files can override
+the default by specifying the env name in the file like *marathon-staging.json*.
 
 These files are exactly what you would put in a regular marathon json configuration, with a couple extra conveniences.
 
-#### staging.json
+#### marathon-staging.json
     {
         "id": "${project.name}",
         "instances": 1,
@@ -76,6 +107,10 @@ These files are exactly what you would put in a regular marathon json configurat
 You will notice variable substitutions for the docker image name and the app id.  The file is parsed by gradle before it is used so you can use anything in the project metadata.
     
 ### Gradle Commands
+    
+    $ gradle dockerFile #Build a dockerfile
+    
+    $ gradle dockerBuild #Build a docker container
     
     $ gradle showMarathonEnvironments
     

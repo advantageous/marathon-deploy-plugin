@@ -6,24 +6,28 @@ class DockerUtils {
     static logger = LoggerFactory.getLogger(DockerUtils.class.getName())
 
     static runDocker(String dockerCoordinates) {
-        logger.info('docker run -P ' + dockerCoordinates)
-        runCommand("docker", "run", "-P", dockerCoordinates)
+        def cmd = "docker run -P $dockerCoordinates"
+        logger.info(cmd)
+        runCommand(cmd)
     }
 
     static pushDocker(String dockerCoordinates) {
-        logger.info("docker push ${dockerCoordinates}")
-        runCommand("docker", "push", dockerCoordinates)
+        def cmd = "docker push $dockerCoordinates"
+        logger.info(cmd)
+        runCommand(cmd)
     }
 
-    static buildDocker(String dockerCoordinates) {
-        logger.info("docker build -t ${dockerCoordinates} build/")
-        runCommand("docker", "build", "-t", dockerCoordinates, "build/")
+    static buildDocker(List<String> tags) {
+        def cmd = "docker build"
+        tags.each { cmd += " -t $it" }
+        cmd += " build/"
+        logger.info(cmd)
+        runCommand(cmd)
     }
 
     static runCommand(String command) {
 
-        logger.infoZ("Running command $command")
-
+        logger.info("Running command $command")
         String[] args = ["/bin/sh", "-c", "$command"]
 
         def stringBuilder = new StringBuilder()
@@ -38,7 +42,10 @@ class DockerUtils {
             stringBuilder.append(it)
         }
 
-        println(stringBuilder.toString())
-        [process.exitValue(), stringBuilder.toString()]
+        if (process.exitValue() != 0) throw new RuntimeException("Command failed: $command")
+
+        def result = stringBuilder.toString()
+        println(result)
+        return result
     }
 }

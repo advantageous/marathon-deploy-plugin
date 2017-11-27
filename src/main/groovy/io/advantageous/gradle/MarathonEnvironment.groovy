@@ -44,8 +44,8 @@ class MarathonEnvironment {
     String getJsonLocation() {
         if (jsonLocation) {
             return jsonLocation
-        } else if (new File("marathon.${name}.json").exists()) {
-            return "marathon.${name}.json"
+        } else if (new File("marathon-${name}.json").exists()) {
+            return "marathon-${name}.json"
         } else if (new File("marathon.json").exists()) {
             return "marathon.json"
         } else {
