@@ -5,12 +5,12 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.4"
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
     }
 }
 
 group 'io.advantageous.gradle'
-version '3.0.1'
+version '3.0.2'
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
@@ -109,7 +109,7 @@ uploadArchives {
             pom.project {
                 packaging 'jar'
                 url 'https://github.com/advantageous/marathon-deploy-plugin'
-                name archivesBaseName
+                name 'io.advantageous.marathon'
                 description "Deploy your application to an Apache Marathon cluster."
 
                 scm {
