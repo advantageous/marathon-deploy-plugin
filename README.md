@@ -7,7 +7,7 @@ Version 3 supports Kotlin DSL, automatic docker config and property overrides pe
 ### build.gradle.kts
 
     plugins {
-      id("io.advantageous.marathon") version "3.0.5"
+      id("io.advantageous.marathon") version "3.0.6"
     }
     
     marathon {
