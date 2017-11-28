@@ -35,9 +35,10 @@ class MarathonDeployPlugin implements Plugin<Project> {
                 if (file.exists()) file.delete()
                 file << generatedFile
             }
+            build.dependsOn "dockerFile"
         }
 
-        project.task("dockerBuild", dependsOn: "dockerFile") {
+        project.task("dockerBuild", dependsOn: "build") {
             doLast {
                 DockerUtils.buildDocker(project.marathon.docker.dockerTags as List<String>)
             }

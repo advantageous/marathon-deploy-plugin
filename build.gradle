@@ -10,7 +10,7 @@ buildscript {
 }
 
 group 'io.advantageous.gradle'
-version '3.0.5'
+version '3.0.6'
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
