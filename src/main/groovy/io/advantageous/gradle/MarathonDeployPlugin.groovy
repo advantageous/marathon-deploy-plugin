@@ -31,7 +31,9 @@ class MarathonDeployPlugin implements Plugin<Project> {
                     dockerFile.exposedPorts.each { generatedFile += "EXPOSE ${it}\n" }
                     generatedFile += "CMD ${dockerFile.cmd}\n"
                 }
-                project.file("build/Dockerfile") << generatedFile
+                def file = project.file("build/Dockerfile")
+                if (file.exists()) file.delete()
+                file << generatedFile
             }
         }
 
