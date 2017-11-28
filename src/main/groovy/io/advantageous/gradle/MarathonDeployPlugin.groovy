@@ -43,13 +43,13 @@ class MarathonDeployPlugin implements Plugin<Project> {
 
         project.task("dockerRun") {
             doLast {
-                DockerUtils.runDocker(project.marathon.docker.dockerTag as String)
+                DockerUtils.runDocker((project.marathon.docker as DockerContainer).dockerTags.first())
             }
         }
 
         project.task("dockerPush", dependsOn: "dockerBuild") {
             doLast {
-                DockerUtils.pushDocker(project.marathon.docker.dockerTag as String)
+                (project.marathon.docker as DockerContainer).dockerTags.each { DockerUtils.pushDocker(it) }
             }
         }
 
