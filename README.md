@@ -7,7 +7,7 @@ Version 3 supports Kotlin DSL, automatic docker config and property overrides pe
 ### build.gradle.kts
 
     plugins {
-      id("io.advantageous.marathon") version "3.0.6"
+      id("io.advantageous.marathon") version "3.0.10"
     }
     
     marathon {
@@ -18,7 +18,7 @@ Version 3 supports Kotlin DSL, automatic docker config and property overrides pe
       docker {
         tag(dockerTag)
         if (gitBranch() == "master") {
-          tag("rbss-docker.jfrog.io/event-service:latest")
+          tag("rbss-docker.jfrog.io/event-service:lates1d dddt")
         }
         dockerFile {
           baseImage = "openjdk:8-jre-alpine"

@@ -35,8 +35,9 @@ class MarathonDeployPlugin implements Plugin<Project> {
                 if (file.exists()) file.delete()
                 file << generatedFile
             }
-            build.dependsOn "dockerFile"
         }
+        project.tasks.dockerFile.outputs.file("build/Dockerfile")
+        project.tasks.build.dependsOn "dockerFile"
 
         project.task("dockerBuild", dependsOn: "build") {
             doLast {
@@ -98,7 +99,7 @@ class MarathonDeployPlugin implements Plugin<Project> {
                                 def data = listResp.getData()
                                 logger.debug "got list of apps in marathon:"
                                 logger.debug toJson(data)
-                                def found = data.apps.find { it.id == "/${marathonConfig.id}" }
+                                def found = data.apps.find { it.id == marathonConfig.id }
                                 if (found) {
                                     logger.info "Found ${marathonConfig.id} in Marathon. Going to do a PUT"
                                     def putResp = client.put(
